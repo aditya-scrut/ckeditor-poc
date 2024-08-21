@@ -19,7 +19,7 @@ import {
   GeneralHtmlSupport,
   Heading,
   Highlight,
-  ImageBlock,
+  Image,
   ImageInsert,
   ImageInsertViaUrl,
   ImageResize,
@@ -111,6 +111,9 @@ const CKEditor = ({
         "undo",
         "redo",
         "|",
+        ...(disableRevisionHistory ? [] : ["revisionHistory"]),
+        ...(disableComments ? [] : ["comment", "commentsArchive"]),
+        "|",
         "importWord",
         "exportPdf",
         "formatPainter",
@@ -156,6 +159,7 @@ const CKEditor = ({
       Autosave,
       Bold,
       CloudServices,
+      ...(disableComments ? [] : [Comments]),
       Essentials,
       ExportPdf,
       FindAndReplace,
@@ -167,7 +171,7 @@ const CKEditor = ({
       GeneralHtmlSupport,
       Heading,
       Highlight,
-      ImageBlock,
+      Image,
       ImageInsert,
       ImageInsertViaUrl,
       ImageResize,
@@ -185,6 +189,7 @@ const CKEditor = ({
       PasteFromOffice,
       PasteFromOfficeEnhanced,
       RemoveFormat,
+      ...(disableRevisionHistory ? [] : [RevisionHistory]),
       SelectAll,
       SimpleUploadAdapter,
       Strikethrough,
@@ -198,7 +203,30 @@ const CKEditor = ({
       Underline,
       Undo,
     ],
-    extraPlugins: [InjectAccessTokenPlugin],
+    extraPlugins: [
+      ...(disableComments ? [] : [CommentsIntegration]),
+      ...(disableRevisionHistory ? [] : [RevisionHistoryIntegration]),
+      InjectAccessTokenPlugin,
+    ],
+    comments: {
+      editorConfig: {
+        extraPlugins: [Bold, Italic, List],
+      },
+    },
+    exportPdf: {
+      tokenUrl: () => getToken("pdf"),
+      stylesheets: [
+        /* This path should point to application stylesheets. */
+        /* See: https://ckeditor.com/docs/ckeditor5/latest/features/converters/export-pdf.html */
+        "./ckeditor.css",
+        /* Export PDF needs access to stylesheets that style the content. */
+        "https://cdn.ckeditor.com/ckeditor5/42.0.0/ckeditor5.css",
+        "https://cdn.ckeditor.com/ckeditor5-premium-features/42.0.0/ckeditor5-premium-features.css",
+      ],
+      fileName: exportFileName,
+      converterOptions: ckeditorPdfOptions,
+      ...exportPdfConf,
+    },
     fontFamily: {
       supportAllValues: true,
     },
@@ -275,7 +303,8 @@ const CKEditor = ({
         options: ["alignBlockLeft", "block", "alignBlockRight"],
       },
     },
-    licenseKey: "<PUT ANY LICENSE KEY HERE>",
+    licenseKey:
+      "ck5ZaGRIMEJtUTAvMWJkLzVQbmNsYkNySktsTVVlM0gwQmtiRzJvbW1JSndYTVZZSlRvUE9QQUxMekZ1eVZscUgvRT0tTWpBeU5ERXdNVFU9",
     link: {
       addTargetToExternalLinks: true,
       defaultProtocol: "https://",
